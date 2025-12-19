@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, X, Upload, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
+import ImageUpload from './ImageUploadSupabase';
+import { deleteImageFromSupabase } from '../contexts/Supabasestorage';
 
 const TeamManagement = ({ language }) => {
   const { supabase } = useAuth();
@@ -17,7 +19,8 @@ const TeamManagement = ({ language }) => {
     position_en: '',
     phone: '',
     email: '',
-    photo: null,
+    photo_url: '',
+    photo_file_path: '',
     display_order: 0
   });
 
@@ -95,10 +98,19 @@ const TeamManagement = ({ language }) => {
         position_en: formData.position_en,
         phone: formData.phone,
         email: formData.email,
+        photo_url: formData.photo_url || null,
+        photo_file_path: formData.photo_file_path || null,
         display_order: formData.display_order
       };
 
       if (editingMember) {
+        // If updating and photo changed, delete old photo
+        if (editingMember.photo_file_path && 
+            editingMember.photo_file_path !== formData.photo_file_path &&
+            formData.photo_file_path) {
+          await deleteImageFromSupabase(editingMember.photo_file_path, supabase);
+        }
+
         const { error } = await supabase
           .from('team_members')
           .update(memberData)
@@ -124,12 +136,22 @@ const TeamManagement = ({ language }) => {
   const handleDelete = async (id) => {
     if (!window.confirm(currentContent.confirmDelete)) return;
 
-    const token = localStorage.getItem('admin_token');
     try {
-      await fetch(`http://localhost:5000/api/team-members/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      // Find the member to get the photo file path
+      const member = members.find(m => m.id === id);
+      
+      // Delete the photo from storage if it exists
+      if (member?.photo_file_path) {
+        await deleteImageFromSupabase(member.photo_file_path, supabase);
+      }
+
+      // Delete the member record
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       fetchMembers();
     } catch (error) {
       console.error('Error deleting member:', error);
@@ -145,7 +167,8 @@ const TeamManagement = ({ language }) => {
       position_en: member.position_en,
       phone: member.phone || '',
       email: member.email || '',
-      photo: null,
+      photo_url: member.photo_url || '',
+      photo_file_path: member.photo_file_path || '',
       display_order: member.display_order
     });
     setShowModal(true);
@@ -159,7 +182,8 @@ const TeamManagement = ({ language }) => {
       position_en: '',
       phone: '',
       email: '',
-      photo: null,
+      photo_url: '',
+      photo_file_path: '',
       display_order: 0
     });
     setEditingMember(null);
@@ -356,22 +380,20 @@ const TeamManagement = ({ language }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {currentContent.photo}
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
-                    <input
-                      type="file"
-                      onChange={(e) => setFormData({ ...formData, photo: e.target.files[0] })}
-                      accept="image/*"
-                      className="hidden"
-                      id="photo-upload"
-                    />
-                    <label htmlFor="photo-upload" className="cursor-pointer">
-                      <Upload size={32} className="mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">{currentContent.uploadPhoto}</p>
-                    </label>
-                  </div>
+                  <ImageUpload
+                    category="team"
+                    currentImage={formData.photo_url}
+                    currentFilePath={formData.photo_file_path}
+                    onImageChange={(url, path) => {
+                      setFormData({
+                        ...formData,
+                        photo_url: url || '',
+                        photo_file_path: path || ''
+                      });
+                    }}
+                    label={currentContent.photo}
+                    language={language}
+                  />
                 </div>
 
                 <div>

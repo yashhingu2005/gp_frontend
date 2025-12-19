@@ -4,6 +4,11 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from '../components/ui/use-toast';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ContactPage = ({ language }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +17,7 @@ const ContactPage = ({ language }) => {
     phone: '',
     message: ''
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const content = {
     mr: {
@@ -23,6 +29,7 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'फोन नंबर',
       messagePlaceholder: 'तुमचा संदेश',
       submitButton: 'संदेश पाठवा',
+      submitting: 'पाठवत आहे...',
       address: 'पत्ता',
       addressDetails: 'ता.दि., मिठमुंबरी, कांपाळ(का)दुदिअग',
       phone: 'फोन',
@@ -30,7 +37,11 @@ const ContactPage = ({ language }) => {
       email: 'ईमेल',
       emailAddress: 'Mushroom institute.kampal(ka)dudiag',
       workingHours: 'कार्यालय वेळ',
-      hours: 'सोमवार - शुक्रवार: 10:00 - 17:00'
+      hours: 'सोमवार - शुक्रवार: 10:00 - 17:00',
+      successTitle: 'यशस्वी!',
+      successMessage: 'तुमचा संदेश यशस्वीरित्या पाठवला गेला. आम्ही लवकरच तुमच्याशी संपर्क साधू.',
+      errorTitle: 'त्रुटी',
+      errorMessage: 'संदेश पाठविण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.'
     },
     en: {
       title: 'Contact',
@@ -41,6 +52,7 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'Phone Number',
       messagePlaceholder: 'Your Message',
       submitButton: 'Send Message',
+      submitting: 'Sending...',
       address: 'Address',
       addressDetails: 'Ta.Di., Mithmumbari, Kampal(Ka)dudiag',
       phone: 'Phone',
@@ -48,17 +60,57 @@ const ContactPage = ({ language }) => {
       email: 'Email',
       emailAddress: 'Mushroom institute.kampal(ka)dudiag',
       workingHours: 'Working Hours',
-      hours: 'Monday - Friday: 10:00 AM - 5:00 PM'
+      hours: 'Monday - Friday: 10:00 AM - 5:00 PM',
+      successTitle: 'Success!',
+      successMessage: 'Your message has been sent successfully. We will contact you soon.',
+      errorTitle: 'Error',
+      errorMessage: 'Failed to send message. Please try again.'
     }
   };
 
   const currentContent = content[language];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
-    });
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            message: formData.message,
+            status: 'new'
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: currentContent.successTitle,
+        description: currentContent.successMessage,
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: currentContent.errorTitle,
+        description: currentContent.errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -110,6 +162,7 @@ const ContactPage = ({ language }) => {
                       placeholder={currentContent.namePlaceholder}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                       required
+                      disabled={submitting}
                     />
                   </div>
                   <div>
@@ -121,6 +174,7 @@ const ContactPage = ({ language }) => {
                       placeholder={currentContent.emailPlaceholder}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                       required
+                      disabled={submitting}
                     />
                   </div>
                   <div>
@@ -132,6 +186,7 @@ const ContactPage = ({ language }) => {
                       placeholder={currentContent.phonePlaceholder}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                       required
+                      disabled={submitting}
                     />
                   </div>
                   <div>
@@ -143,13 +198,15 @@ const ContactPage = ({ language }) => {
                       rows="5"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
                       required
+                      disabled={submitting}
                     ></textarea>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white py-3 rounded-lg font-semibold"
+                    disabled={submitting}
+                    className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {currentContent.submitButton}
+                    {submitting ? currentContent.submitting : currentContent.submitButton}
                   </Button>
                 </form>
               </div>

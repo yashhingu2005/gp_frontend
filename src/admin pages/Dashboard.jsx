@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Users, Newspaper, Calendar, MessageSquare,
-  ArrowUpRight, ArrowDownRight, Eye
+  Users, Newspaper, Calendar, MessageSquare,
+  ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -24,7 +24,6 @@ const Dashboard = ({ language, setCurrentPage }) => {
       pendingContacts: 'प्रलंबित संपर्क',
       teamMembers: 'संघ सदस्य',
       recentActivity: 'अलीकडील क्रियाकलाप',
-      quickStats: 'द्रुत आकडेवारी',
       viewAll: 'सर्व पहा'
     },
     en: {
@@ -34,7 +33,6 @@ const Dashboard = ({ language, setCurrentPage }) => {
       pendingContacts: 'Pending Contacts',
       teamMembers: 'Team Members',
       recentActivity: 'Recent Activity',
-      quickStats: 'Quick Statistics',
       viewAll: 'View All'
     }
   };
@@ -167,89 +165,47 @@ const Dashboard = ({ language, setCurrentPage }) => {
         ))}
       </div>
 
-      {/* Charts and Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800">{currentContent.recentActivity}</h2>
-            <button className="text-sm text-green-600 hover:text-green-700 font-semibold flex items-center gap-1">
-              {currentContent.viewAll}
-              <ArrowUpRight size={16} />
-            </button>
-          </div>
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white rounded-2xl shadow-lg p-6"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-800">{currentContent.recentActivity}</h2>
+          <button className="text-sm text-green-600 hover:text-green-700 font-semibold flex items-center gap-1">
+            {currentContent.viewAll}
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
 
-          <div className="space-y-4">
-            {[
-              { action: 'New contact submission', time: '5 minutes ago', icon: MessageSquare, color: 'bg-orange-100 text-orange-600' },
-              { action: 'News article published', time: '1 hour ago', icon: Newspaper, color: 'bg-blue-100 text-blue-600' },
-              { action: 'Team member added', time: '3 hours ago', icon: Users, color: 'bg-green-100 text-green-600' },
-              { action: 'Event created', time: '5 hours ago', icon: Calendar, color: 'bg-purple-100 text-purple-600' },
-              { action: 'News article updated', time: '1 day ago', icon: Newspaper, color: 'bg-blue-100 text-blue-600' }
-            ].map((activity, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-                className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <div className={`p-2 rounded-lg ${activity.color}`}>
-                  <activity.icon size={20} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800">{activity.action}</p>
-                  <p className="text-xs text-gray-500">{activity.time}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-green-600 to-teal-600 rounded-2xl shadow-lg p-6 text-white"
-        >
-          <h2 className="text-xl font-bold mb-6">{currentContent.quickStats}</h2>
-
-          <div className="space-y-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Page Views</span>
-                <Eye size={18} />
+        <div className="space-y-4">
+          {[
+            { action: 'New contact submission', time: '5 minutes ago', icon: MessageSquare, color: 'bg-orange-100 text-orange-600' },
+            { action: 'News article published', time: '1 hour ago', icon: Newspaper, color: 'bg-blue-100 text-blue-600' },
+            { action: 'Team member added', time: '3 hours ago', icon: Users, color: 'bg-green-100 text-green-600' },
+            { action: 'Event created', time: '5 hours ago', icon: Calendar, color: 'bg-purple-100 text-purple-600' },
+            { action: 'News article updated', time: '1 day ago', icon: Newspaper, color: 'bg-blue-100 text-blue-600' }
+          ].map((activity, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + index * 0.05 }}
+              className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <div className={`p-2 rounded-lg ${activity.color}`}>
+                <activity.icon size={20} />
               </div>
-              <p className="text-3xl font-bold">12,458</p>
-              <p className="text-xs text-green-100 mt-1">+18% from last month</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Active Users</span>
-                <TrendingUp size={18} />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-800">{activity.action}</p>
+                <p className="text-xs text-gray-500">{activity.time}</p>
               </div>
-              <p className="text-3xl font-bold">842</p>
-              <p className="text-xs text-green-100 mt-1">+24% from last week</p>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Documents</span>
-                <Newspaper size={18} />
-              </div>
-              <p className="text-3xl font-bold">156</p>
-              <p className="text-xs text-green-100 mt-1">Total available</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 };

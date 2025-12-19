@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Navbar from './components/Navbar';
@@ -13,10 +13,16 @@ import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
+  const [language, setLanguage] = useState('mr'); // Default to Marathi
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'mr' ? 'en' : 'mr');
+  };
+
   return (
     <AuthProvider>
       <Router>
-        <AppContent />
+        <AppContent language={language} toggleLanguage={toggleLanguage} />
       </Router>
     </AuthProvider>
   );

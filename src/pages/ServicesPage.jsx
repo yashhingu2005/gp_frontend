@@ -1,75 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { FileText, CreditCard, Baby, Home, Download } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
-import { toast } from '../components/ui/use-toast';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ServicesPage = ({ language }) => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setServices(data || []);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const content = {
     mr: {
       title: 'नागरीक सेवा',
       subtitle: 'आमच्या सर्व सेवा आणि फॉर्म्स येथे उपलब्ध आहेत',
-      services: [
-        {
-          icon: FileText,
-          title: 'दस्तऐवज व प्रमाणपत्रे',
-          description: 'विविध प्रकारचे प्रमाणपत्रे आणि दस्तऐवज मिळवा'
-        },
-        {
-          icon: CreditCard,
-          title: 'कर भरणा व प्रमाणपत्रे',
-          description: 'ऑनलाईन कर भरणा आणि पावत्या डाउनलोड करा'
-        },
-        {
-          icon: Baby,
-          title: 'जन्म-मृत्यू प्रमाणपत्रे',
-          description: 'जन्म आणि मृत्यू प्रमाणपत्रांसाठी अर्ज करा'
-        },
-        {
-          icon: Home,
-          title: 'निवासी प्रमाणपत्रे',
-          description: 'रहिवासी प्रमाणपत्र मिळवा'
-        }
-      ],
-      downloadForm: 'फॉर्म डाउनलोड करा'
+      downloadForm: 'फॉर्म डाउनलोड करा',
+      noServices: 'सध्या कोणत्याही सेवा उपलब्ध नाहीत',
+      formAvailable: 'फॉर्म उपलब्ध'
     },
     en: {
       title: 'Citizen Services',
       subtitle: 'All our services and forms are available here',
-      services: [
-        {
-          icon: FileText,
-          title: 'Documents & Certificates',
-          description: 'Get various types of certificates and documents'
-        },
-        {
-          icon: CreditCard,
-          title: 'Tax Payment & Certificates',
-          description: 'Pay taxes online and download receipts'
-        },
-        {
-          icon: Baby,
-          title: 'Birth-Death Certificates',
-          description: 'Apply for birth and death certificates'
-        },
-        {
-          icon: Home,
-          title: 'Residential Certificates',
-          description: 'Get residential certificates'
-        }
-      ],
-      downloadForm: 'Download Form'
+      downloadForm: 'Download Form',
+      noServices: 'No services available at the moment',
+      formAvailable: 'Form Available'
     }
   };
 
   const currentContent = content[language];
 
-  const handleDownload = () => {
-    toast({
-      title: "🚧 This feature isn't implemented yet. "
-    });
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center h-96">
+            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -93,38 +87,55 @@ const ServicesPage = ({ language }) => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {currentContent.services.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow"
-              >
-                <div className="flex items-start gap-6">
-                  <div className="bg-gradient-to-br from-green-500 to-teal-500 p-4 rounded-xl">
-                    <service.icon size={32} className="text-white" />
+          {services.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText size={64} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-600 text-lg">{currentContent.noServices}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {services.map((service, index) => (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow"
+                >
+                  <div className="flex items-start gap-6">
+                    <div className="bg-gradient-to-br from-green-500 to-teal-500 p-4 rounded-xl flex-shrink-0">
+                      <FileText size={32} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">
+                        {language === 'mr' ? service.title_mr : service.title_en}
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        {language === 'mr' ? service.description_mr : service.description_en}
+                      </p>
+                      {service.form_url ? (
+                        <a
+                          href={service.form_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
+                            <Download size={18} className="mr-2" />
+                            {currentContent.downloadForm}
+                          </Button>
+                        </a>
+                      ) : (
+                        <div className="text-sm text-gray-500 italic">
+                          {language === 'mr' ? 'फॉर्म लवकरच उपलब्ध होईल' : 'Form coming soon'}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">
-                      {service.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {service.description}
-                    </p>
-                    <Button
-                      onClick={handleDownload}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <Download size={18} className="mr-2" />
-                      {currentContent.downloadForm}
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -3,6 +3,12 @@ import AdminLogin from './AdminLogin';
 import AdminLayout from './AdminLayout';
 import Dashboard from './Dashboard';
 import TeamManagement from './TeamManagement';
+import NewsManagement from './newsmanagement';
+import GalleryManagement from './Gallarymanagement';
+import ServicesManagement from './ServicesManagement';
+import ContactsManagement from './ContactsManagement';
+import EventsManagement from './EventManagement';
+import SettingsManagement from './Settingsmanagement';
 import { useAuth } from '../contexts/AuthContext';
 // Import other management components as needed
 
@@ -35,18 +41,18 @@ const AdminApp = () => {
       case 'team':
         return <TeamManagement language={language} />;
       // Add other pages here:
-      // case 'news':
-      //   return <NewsManagement language={language} />;
-      // case 'events':
-      //   return <EventsManagement language={language} />;
-      // case 'services':
-      //   return <ServicesManagement language={language} />;
-      // case 'contacts':
-      //   return <ContactsManagement language={language} />;
-      // case 'gallery':
-      //   return <GalleryManagement language={language} />;
-      // case 'settings':
-      //   return <SettingsManagement language={language} />;
+      case 'news':
+        return <NewsManagement language={language} />;
+      case 'events':
+       return <EventsManagement language={language} />;
+       case 'services':
+        return <ServicesManagement language={language} />;
+       case 'contacts':
+        return <ContactsManagement language={language} />;
+      case 'gallery':
+        return <GalleryManagement language={language} />;
+      case 'settings':
+        return <SettingsManagement language={language} />;
       default:
         return <Dashboard language={language} setCurrentPage={setCurrentPage} />;
     }
