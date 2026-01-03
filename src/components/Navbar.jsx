@@ -44,14 +44,14 @@ const Navbar = ({
     }]
   };
   const currentMenu = menuItems[language];
-  return <nav className="bg-white shadow-md sticky top-0 z-50">
+  return <nav className="bg-blue-100 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
-            <img src="https://res.cloudinary.com/daqm7msfs/image/upload/v1764668932/gp_logo_rough_hkpohq.png" alt="मिठमुंबरी ग्रामपंचायत Logo" className="h-14 w-14 object-contain" />
+            <img src="https://res.cloudinary.com/daqm7msfs/image/upload/v1764677291/final_gp_logo_so7lxk.jpg" alt="मिठमुंबरी ग्रामपंचायत Logo" className="h-14 w-14 object-contain" />
             <div>
               <span className="text-lg font-bold text-green-700 block leading-tight">
-                {language === 'mr' ? 'महाराष्ट्र शासन - ग्रामपंचायत कार्यालय' : 'Maharashtra Government - Gram Panchayat Office'}
+                {language === 'mr' ? 'महाराष्ट्र शासन - ग्रामपंचायत कार्यालय' : 'Maharashtra Government - Gram Panchayat Office Mithmumbari'}
               </span>
               <span className="text-sm text-red-600 font-semibold">
                 {language === 'mr' ? 'अधिकृत वेबसाईट' : 'Official Website'}

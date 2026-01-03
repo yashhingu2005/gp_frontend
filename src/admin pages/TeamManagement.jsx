@@ -4,10 +4,9 @@ import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import ImageUpload from './ImageUploadSupabase';
-import { deleteImageFromSupabase } from '../contexts/Supabasestorage';
 
 const TeamManagement = ({ language }) => {
-  const { supabase } = useAuth();
+  const { apiService } = useAuth(); // Changed from supabase to apiService
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -69,19 +68,17 @@ const TeamManagement = ({ language }) => {
 
   const fetchMembers = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('*')
-        .order('display_order', { ascending: true });
+      // Updated to use apiService
+      const { data, error } = await apiService.getTeamMembers();
 
-      if (error) throw error;
+      if (error) throw new Error(error);
       setMembers(data || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching members:', error);
       setLoading(false);
     }
-  }, [supabase]);
+  }, [apiService]);
 
   useEffect(() => {
     fetchMembers();
@@ -108,21 +105,22 @@ const TeamManagement = ({ language }) => {
         if (editingMember.photo_file_path && 
             editingMember.photo_file_path !== formData.photo_file_path &&
             formData.photo_file_path) {
-          await deleteImageFromSupabase(editingMember.photo_file_path, supabase);
+          // Note: Delete functionality will be handled by backend in future
+          // For now, we just update the record
         }
 
-        const { error } = await supabase
-          .from('team_members')
-          .update(memberData)
-          .eq('id', editingMember.id);
+        // Updated to use apiService
+        const { error } = await apiService.updateTeamMember({
+          id: editingMember.id,
+          ...memberData
+        });
 
-        if (error) throw error;
+        if (error) throw new Error(error);
       } else {
-        const { error } = await supabase
-          .from('team_members')
-          .insert([memberData]);
+        // Updated to use apiService
+        const { error } = await apiService.createTeamMember(memberData);
 
-        if (error) throw error;
+        if (error) throw new Error(error);
       }
 
       fetchMembers();
@@ -130,6 +128,7 @@ const TeamManagement = ({ language }) => {
       resetForm();
     } catch (error) {
       console.error('Error saving member:', error);
+      alert('Failed to save member: ' + error.message);
     }
   };
 
@@ -142,19 +141,19 @@ const TeamManagement = ({ language }) => {
       
       // Delete the photo from storage if it exists
       if (member?.photo_file_path) {
-        await deleteImageFromSupabase(member.photo_file_path, supabase);
+        // Note: Delete functionality will be handled by backend in future
+        // For now, we just delete the record
       }
 
-      // Delete the member record
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('id', id);
+      // Delete the member record - Updated to use apiService
+      const { error } = await apiService.deleteTeamMember(id);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
+      
       fetchMembers();
     } catch (error) {
       console.error('Error deleting member:', error);
+      alert('Failed to delete member: ' + error.message);
     }
   };
 

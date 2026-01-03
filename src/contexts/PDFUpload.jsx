@@ -10,7 +10,7 @@ const PDFUpload = ({
   label,
   language = 'en'
 }) => {
-  const { supabase } = useAuth();
+  const { apiService } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -62,31 +62,14 @@ const PDFUpload = ({
     setUploading(true);
 
     try {
-      // Generate unique filename
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substring(2, 8);
-      const fileExt = 'pdf';
-      const fileName = `${category}_${timestamp}_${random}.${fileExt}`;
-      const filePath = `${category}/${fileName}`;
-
-      // Upload to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('gp-photos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('gp-photos')
-        .getPublicUrl(filePath);
-
-      if (urlData?.publicUrl) {
-        onFileChange(urlData.publicUrl, filePath);
+      // Upload to PHP backend
+      const { data, error: uploadError } = await apiService.uploadFile(file, category, 'pdf');
+      
+      if (uploadError) {
+        throw new Error(uploadError);
       }
+
+      onFileChange(data.url, data.filepath);
     } catch (err) {
       console.error('Upload error:', err);
       setError(currentContent.error + ': ' + err.message);

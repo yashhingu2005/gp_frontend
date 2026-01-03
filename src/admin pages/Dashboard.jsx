@@ -7,7 +7,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = ({ language, setCurrentPage }) => {
-  const { supabase } = useAuth();
+  const { apiService } = useAuth();
   const [stats, setStats] = useState({
     news: 0,
     events: 0,
@@ -41,25 +41,25 @@ const Dashboard = ({ language, setCurrentPage }) => {
 
   const fetchStats = useCallback(async () => {
     try {
-      const [newsCount, eventsCount, contactsCount, teamCount] = await Promise.all([
-        supabase.from('news_announcements').select('*', { count: 'exact', head: true }),
-        supabase.from('events').select('*', { count: 'exact', head: true }),
-        supabase.from('contact_submissions').select('*', { count: 'exact', head: true }).eq('status', 'new'),
-        supabase.from('team_members').select('*', { count: 'exact', head: true })
+      const [newsRes, eventsRes, contactsRes, teamRes] = await Promise.all([
+        apiService.getNews(),
+        apiService.getEvents(),
+        apiService.getContacts(),
+        apiService.getTeamMembers()
       ]);
 
       setStats({
-        news: newsCount.count || 0,
-        events: eventsCount.count || 0,
-        pendingContacts: contactsCount.count || 0,
-        teamMembers: teamCount.count || 0
+        news: newsRes.data?.length || 0,
+        events: eventsRes.data?.length || 0,
+        pendingContacts: contactsRes.data?.filter(c => c.status === 'new' || c.status === 'pending').length || 0,
+        teamMembers: teamRes.data?.length || 0
       });
       setLoading(false);
     } catch (error) {
       console.error('Error fetching stats:', error);
       setLoading(false);
     }
-  }, [supabase]);
+  }, [apiService]);
 
   useEffect(() => {
     fetchStats();

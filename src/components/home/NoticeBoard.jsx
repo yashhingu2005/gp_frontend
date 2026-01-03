@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import apiService from '../../services/apiService';
 
 const NoticeBoard = ({ language }) => {
   const [currentNotice, setCurrentNotice] = useState(0);
@@ -17,18 +13,16 @@ const NoticeBoard = ({ language }) => {
 
   const fetchNotices = async () => {
     try {
-      const { data, error } = await supabase
-        .from('news_announcements')
-        .select('*')
-        .eq('is_active', true)
-        .eq('category', 'notice')
-        .order('published_date', { ascending: false })
-        .limit(4);
+      const { data, error } = await apiService.getNews();
 
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setNotices(data);
+        const notices = data
+          .filter(n => (n.is_active === 1 || n.is_active === true) && n.category === 'notice')
+          .sort((a, b) => new Date(b.date || b.published_date) - new Date(a.date || a.published_date))
+          .slice(0, 4);
+        setNotices(notices);
       } else {
         // Fallback to default notices if no data
         setNotices([]);

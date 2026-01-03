@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CreditCard, Baby, Home, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import apiService from '../../services/apiService';
 
 const QuickServices = ({ language }) => {
   const [services, setServices] = useState([]);
@@ -26,15 +22,14 @@ const QuickServices = ({ language }) => {
 
   const fetchServices = async () => {
     try {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true })
-        .limit(4);
+      const { data, error } = await apiService.getServices();
 
       if (error) throw error;
-      setServices(data || []);
+      const activeServices = (data || [])
+        .filter(s => s.is_active === 1 || s.is_active === true)
+        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+        .slice(0, 4);
+      setServices(activeServices);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {

@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import DemographicsTable from '../components/about/DemographicsTable';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import CommitteesTable from '../components/about/CommiteesTable';
+import apiService from '../services/apiService';
 
 const AboutPage = ({ language }) => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -18,14 +15,15 @@ const AboutPage = ({ language }) => {
 
   const fetchTeamMembers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
+      const { data, error } = await apiService.getTeamMembers();
 
       if (error) throw error;
-      setTeamMembers(data || []);
+      
+      const activeMembers = (data || [])
+        .filter(m => m.is_active === 1 || m.is_active === true)
+        .sort((a, b) => a.display_order - b.display_order);
+      
+      setTeamMembers(activeMembers);
     } catch (error) {
       console.error('Error fetching team members:', error);
     } finally {
@@ -117,6 +115,7 @@ const AboutPage = ({ language }) => {
         </section>
 
         <DemographicsTable language={language} />
+        <CommitteesTable language={language} />
       </div>
     </>
   );

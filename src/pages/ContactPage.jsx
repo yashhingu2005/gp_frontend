@@ -4,11 +4,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from '../components/ui/use-toast';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import apiService from '../services/apiService';
 
 const ContactPage = ({ language }) => {
   const [formData, setFormData] = useState({
@@ -29,19 +25,14 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'फोन नंबर',
       messagePlaceholder: 'तुमचा संदेश',
       submitButton: 'संदेश पाठवा',
-      submitting: 'पाठवत आहे...',
       address: 'पत्ता',
-      addressDetails: 'ता.दि., मिठमुंबरी, कांपाळ(का)दुदिअग',
+      addressDetails: 'मिठमुंबरी, देवगड तालुका, जि. सिंधुदुर्ग ४१६६१२ ',
       phone: 'फोन',
-      phoneNumber: '123456890',
+      phoneNumber: '9869127240',
       email: 'ईमेल',
-      emailAddress: 'Mushroom institute.kampal(ka)dudiag',
+      emailAddress: 'gpmithmumbari01@gmail.com',
       workingHours: 'कार्यालय वेळ',
-      hours: 'सोमवार - शुक्रवार: 10:00 - 17:00',
-      successTitle: 'यशस्वी!',
-      successMessage: 'तुमचा संदेश यशस्वीरित्या पाठवला गेला. आम्ही लवकरच तुमच्याशी संपर्क साधू.',
-      errorTitle: 'त्रुटी',
-      errorMessage: 'संदेश पाठविण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.'
+      hours: 'सोमवार - शुक्रवार: 09:45 AM - 06:15 PM'
     },
     en: {
       title: 'Contact',
@@ -52,19 +43,14 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'Phone Number',
       messagePlaceholder: 'Your Message',
       submitButton: 'Send Message',
-      submitting: 'Sending...',
       address: 'Address',
-      addressDetails: 'Ta.Di., Mithmumbari, Kampal(Ka)dudiag',
+      addressDetails: 'Mithmumbari, Devgad Taluka, District- Sindhudurg 416612',
       phone: 'Phone',
-      phoneNumber: '123456890',
+      phoneNumber: '9869127240',
       email: 'Email',
-      emailAddress: 'Mushroom institute.kampal(ka)dudiag',
+      emailAddress: 'gpmithmumbari01@gmail.com',
       workingHours: 'Working Hours',
-      hours: 'Monday - Friday: 10:00 AM - 5:00 PM',
-      successTitle: 'Success!',
-      successMessage: 'Your message has been sent successfully. We will contact you soon.',
-      errorTitle: 'Error',
-      errorMessage: 'Failed to send message. Please try again.'
+      hours: 'Monday - Friday: 09:45 AM - 6:15 PM'
     }
   };
 
@@ -75,17 +61,13 @@ const ContactPage = ({ language }) => {
     setSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_submissions')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            message: formData.message,
-            status: 'new'
-          }
-        ]);
+      const { error } = await apiService.submitContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        status: 'new'
+      });
 
       if (error) throw error;
 
@@ -262,7 +244,8 @@ const ContactPage = ({ language }) => {
 
               <div className="bg-white rounded-2xl shadow-lg p-2 h-80">
                 <iframe
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=72.8%2C19.0%2C72.9%2C19.1&layer=mapnik"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=73.367789%2C16.363511%2C73.387789%2C16.383511&layer=mapnik
+"
                   className="w-full h-full rounded-xl"
                   title="Location Map"
                 ></iframe>

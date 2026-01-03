@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { uploadImageToSupabase, deleteImageFromSupabase, extractFilePathFromUrl } from '../contexts/Supabasestorage';
 import { useAuth } from '../contexts/AuthContext';
 
 const ImageUpload = ({ 
@@ -11,7 +10,7 @@ const ImageUpload = ({
   label = 'Upload Image',
   language = 'en'
 }) => {
-  const { supabase } = useAuth();
+  const { apiService } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(currentImage);
   const [filePath, setFilePath] = useState(currentFilePath);
@@ -48,15 +47,29 @@ const ImageUpload = ({
     setUploading(true);
 
     try {
-      // Upload to Supabase Storage
-      const result = await uploadImageToSupabase(file, category, supabase);
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Invalid file type. Only images allowed.');
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File too large. Maximum size is 5MB.');
+      }
+
+      // Upload to PHP backend
+      const { data, error: uploadError } = await apiService.uploadFile(file, category, 'image');
       
+      if (uploadError) {
+        throw new Error(uploadError);
+      }
+
       // Set preview and file path
-      setPreview(result.imageUrl);
-      setFilePath(result.filePath);
+      setPreview(data.url);
+      setFilePath(data.filepath);
       
       // Notify parent component
-      onImageChange(result.imageUrl, result.filePath);
+      onImageChange(data.url, data.filepath);
       
     } catch (err) {
       setError(err.message);
@@ -68,13 +81,6 @@ const ImageUpload = ({
   };
 
   const handleRemove = async () => {
-    if (filePath) {
-      try {
-        await deleteImageFromSupabase(filePath, supabase);
-      } catch (err) {
-        console.error('Error deleting image:', err);
-      }
-    }
     setPreview(null);
     setFilePath(null);
     onImageChange(null, null);

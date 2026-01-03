@@ -6,9 +6,9 @@ const Footer = ({ language }) => {
   const content = {
     mr: {
       contactTitle: 'संपर्क माहिती',
-      address: 'ता.दि. मिठमुंबरी, कांपाळ तालुका',
-      phone: '01 1234567',
-      email: 'mithmumbari@gramkampal.org',
+      address: 'मिठमुंबरी, देवगड तालुका, जि. सिंधुदुर्ग ४१६६१२',
+      phone: '9869127240',
+      email: 'gpmithmumbari01@gmail.com',
       quickLinksTitle: 'द्रुत दुवे',
       links: [
         { label: 'मुख्य पान', path: '/' },
@@ -27,9 +27,9 @@ const Footer = ({ language }) => {
     },
     en: {
       contactTitle: 'Contact Info',
-      address: 'Ta.Di. Mithmumbari, Kampal Taluka',
-      phone: '01 1234567',
-      email: 'mithmumbari@gramkampal.org',
+      address: 'Mithmumbari, Devgad Taluka, District- Sindhudurg 416612',
+      phone: '9869127240',
+      email: 'gpmithmumbari01@gmail.com',
       quickLinksTitle: 'Quick Links',
       links: [
         { label: 'Home', path: '/' },

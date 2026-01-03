@@ -3,11 +3,7 @@ import { Helmet } from 'react-helmet';
 import HeroSection from '../components/home/HeroSection';
 import QuickServices from '../components/home/QuickServices';
 import NewsSection from '../components/home/NewsSection';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'your-supabase-url';
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import apiService from '../services/apiService';
 
 const HomePage = ({ language }) => {
   const [featuredNews, setFeaturedNews] = useState([]);
@@ -19,16 +15,16 @@ const HomePage = ({ language }) => {
 
   const fetchFeaturedNews = async () => {
     try {
-      const { data, error } = await supabase
-        .from('news_announcements')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_featured', true)
-        .order('published_date', { ascending: false })
-        .limit(3);
+      const { data, error } = await apiService.getNews();
 
       if (error) throw error;
-      setFeaturedNews(data || []);
+      
+      const featured = (data || [])
+        .filter(n => (n.is_active === 1 || n.is_active === true) && (n.is_featured === 1 || n.is_featured === true))
+        .sort((a, b) => new Date(b.date || b.published_date) - new Date(a.date || a.published_date))
+        .slice(0, 3);
+      
+      setFeaturedNews(featured);
     } catch (error) {
       console.error('Error fetching featured news:', error);
     } finally {

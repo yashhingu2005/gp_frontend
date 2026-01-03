@@ -5,11 +5,12 @@ const DemographicsTable = ({ language }) => {
   const content = {
     mr: {
       title: 'ग्रामपंचायत माहिती :',
-      subtitle: 'सन २०११ नुसार गावची लोकसंख्या : ५४९०',
+      subtitle: 'सन २०११ नुसार गावची लोकसंख्या : 920',
       tableHeaders: ['तपशील', 'एकूण', 'पुरुष', 'स्त्री'],
       rows: [
-        { label: 'एकूण कुटुंब संख्या', total: '८७७', male: '–', female: '–' },
-        { label: 'लोकसंख्या', total: '५४९०', male: '२७७१', female: '२६३९' },
+        { label: 'एकूण कुटुंब संख्या', total: '265', male: '–', female: '–' },
+        { label: 'लोकसंख्या', total: '920', male: '447', female: '473' },
+        { label: 'मतदार लोकसंख्या', total: '724', male: '354', female: '370' },
         { label: 'मुले (०-६)', total: '११०४', male: '५२१', female: '५६९' },
         { label: 'अनुसूचित जाती', total: '३५', male: '१७', female: '१८' },
         { label: 'अनुसूचित जमाती', total: '४५५३', male: '२२६२', female: '२२९०' },
@@ -19,27 +20,22 @@ const DemographicsTable = ({ language }) => {
         { label: 'सीमांत कामगार', total: '२९', male: '१५', female: '१४' }
       ],
       additionalInfo: [
-        { label: 'एकूण कुटुंब संख्या', value: '८७७' },
-        { label: 'दारिद्र रेखाखालील कुटुंब संख्या', value: '७६५' },
-        { label: 'प्रधान मंत्री आवास प्रतिक्षा याची कुटुंब संख्या', value: '२३७' },
-        { label: 'प्रधान मंत्री आवास योजना मंजूर झालेली संख्या', value: '२३७' },
-        { label: 'एकूण महसूली पाहणीचा संख्या', value: '०६' },
-        { label: 'रस्ते धान्य दुकान संख्या', value: '०२' },
-        { label: '५ कि.मी. अंतरले ग्रामपंचायतीचे नांव : फोंडीरी, लाकच्चया हनुमान, खांवार', value: '' },
-        { label: 'गावापासून रेल्वे स्टेशनचे अंतर', value: '५५ कि.मी.' },
-        { label: 'गावापासून विमानतळाचे अंतर', value: '२८० कि.मी.' },
-        { label: 'गावापासून तालुकास्थाने अंतर', value: '३० कि.मी.' },
-        { label: 'गावापासून उपजिल्हा कामगाराचे अंतर', value: '३० कि.मी.' },
-        { label: 'गावापासून मोबाईल दळणवर्गाचे अंतर', value: '५५ कि.मी. (साँगली पो.ट्टे.)' }
+        { label: 'एकूण कुटुंब संख्या', value: '264' },
+        { label: 'जि. प. शाळा', value: '1' },
+        { label: 'अंगणवाडी ', value: '3' },
+        { label: 'स्वयं सहाय्यता गट ', value: '17' },
+        { label: 'जवळचे रेल्वे स्थानक', value: 'नंदगाव रोड' },
+        { label: 'जवळचे विमानतळ', value: 'रत्नागिरी विमानतळ' },
       ]
     },
     en: {
       title: 'Gram Panchayat Information:',
-      subtitle: 'As per 2011 Census Village Population: 5490',
+      subtitle: 'As per 2011 Census Village Population: 920',
       tableHeaders: ['Details', 'Total', 'Male', 'Female'],
       rows: [
-        { label: 'Total Families', total: '877', male: '–', female: '–' },
-        { label: 'Population', total: '5490', male: '2771', female: '2639' },
+        { label: 'Total Families', total: '265', male: '–', female: '–' },
+        { label: 'Population', total: '920', male: '447', female: '473' },
+        { label: 'Voter Population', total: '724', male: '354', female: '370' },
         { label: 'Children (0-6)', total: '1104', male: '521', female: '569' },
         { label: 'Scheduled Castes', total: '35', male: '17', female: '18' },
         { label: 'Scheduled Tribes', total: '4553', male: '2262', female: '2290' },
@@ -49,18 +45,12 @@ const DemographicsTable = ({ language }) => {
         { label: 'Marginal Workers', total: '29', male: '15', female: '14' }
       ],
       additionalInfo: [
-        { label: 'Total Family Count', value: '877' },
-        { label: 'Below Poverty Line Families', value: '765' },
-        { label: 'PM Housing Waiting List', value: '237' },
-        { label: 'PM Housing Scheme Approved', value: '237' },
-        { label: 'Total Revenue Inspection', value: '06' },
-        { label: 'Ration Shops', value: '02' },
-        { label: '5 km away Gram Panchayat names: Fondiri, Lakachya Hanuman, Khanvar', value: '' },
-        { label: 'Distance from village to railway station', value: '55 km' },
-        { label: 'Distance from village to airport', value: '280 km' },
-        { label: 'Distance from village to taluka place', value: '30 km' },
-        { label: 'Distance from village to sub-district office', value: '30 km' },
-        { label: 'Distance from village to mobile tower', value: '55 km (Sangli P.O.)' }
+        { label: 'Total Family Count', value: '264' },
+        { label: 'District Council Schools', value: '1' },
+        { label: 'Anganwadi', value: '3' },
+        { label: 'Self Help Groups', value: '17' },
+        { label: 'Nearest Railway Station', value: 'Nandgaon Road' },
+        { label: 'Nearest Airport Station', value: 'Ratnagiri Airport' },
       ]
     }
   };

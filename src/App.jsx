@@ -40,6 +40,7 @@ function AppContent({ language, toggleLanguage }) {
       </Helmet>
       <div className="min-h-screen bg-gray-50">
         {!isAdminRoute && <Navbar language={language} toggleLanguage={toggleLanguage} />}
+        
         <Routes>
           <Route path="/" element={<HomePage language={language} />} />
           <Route path="/about" element={<AboutPage language={language} />} />
