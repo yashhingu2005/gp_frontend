@@ -2,6 +2,7 @@
 // This handles all API calls to your PHP backend
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://yourdomain.com/backend/api';
+const ASSETS_BASE_URL = process.env.REACT_APP_ASSETS_URL || 'https://assets.gpmithmumbari.com';
 
 class ApiService {
   constructor() {
@@ -266,6 +267,7 @@ class ApiService {
   }
 
   // File Upload
+// Update the uploadFile method
   async uploadFile(file, category, fileType = 'image') {
     const formData = new FormData();
     formData.append('file', file);
@@ -289,11 +291,27 @@ class ApiService {
         throw new Error(data.error || 'Upload failed');
       }
 
+      // Transform the response to use the assets domain
+      if (data.filepath) {
+        data.url = `${ASSETS_BASE_URL}/${data.filepath}`;
+      }
+
       return { data, error: null };
     } catch (error) {
       console.error('Upload Error:', error);
       return { data: null, error: error.message };
     }
+  }
+
+  // Add a helper method to get full asset URL
+  getAssetUrl(filepath) {
+    if (!filepath) return null;
+    // If it's already a full URL, return as is
+    if (filepath.startsWith('http://') || filepath.startsWith('https://')) {
+      return filepath;
+    }
+    // Otherwise, prepend the assets base URL
+    return `${ASSETS_BASE_URL}/${filepath}`;
   }
 
   // Delete File

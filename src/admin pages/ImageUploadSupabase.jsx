@@ -66,10 +66,14 @@ const ImageUpload = ({
 
       // Set preview and file path
       setPreview(data.url);
+      const finalUrl = `https://assets.gpmithmumbari.com/${data.filepath}`;
+
+      setPreview(finalUrl);
       setFilePath(data.filepath);
       
       // Notify parent component
       onImageChange(data.url, data.filepath);
+      onImageChange(finalUrl, data.filepath);
       
     } catch (err) {
       setError(err.message);
