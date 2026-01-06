@@ -33,11 +33,11 @@ const AboutPage = ({ language }) => {
 
   const content = {
     mr: {
-      title: 'आमचा संघ',
+      title: 'पदाधिकारी',
       noMembers: 'सध्या कोणतेही संघ सदस्य उपलब्ध नाहीत'
     },
     en: {
-      title: 'Meet the Team',
+      title: 'Officers',
       noMembers: 'No team members available at the moment'
     }
   };

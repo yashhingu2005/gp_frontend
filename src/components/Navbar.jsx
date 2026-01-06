@@ -48,7 +48,7 @@ const Navbar = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
-            <img src="https://res.cloudinary.com/daqm7msfs/image/upload/v1764677291/final_gp_logo_so7lxk.jpg" alt="मिठमुंबरी ग्रामपंचायत Logo" className="h-14 w-14 object-contain" />
+            <img src="https://assets.gpmithmumbari.com/gallery/logo.png" alt="मिठमुंबरी ग्रामपंचायत Logo" className="h-14 w-14 object-contain" />
             <div>
               <span className="text-lg font-bold text-green-700 block leading-tight">
                 {language === 'mr' ? 'महाराष्ट्र शासन - ग्रामपंचायत कार्यालय' : 'Maharashtra Government - Gram Panchayat Office Mithmumbari'}

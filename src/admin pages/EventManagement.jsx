@@ -197,28 +197,35 @@ const EventsManagement = ({ language }) => {
   };
 
   const addGalleryImage = () => {
-    setFormData({
-      ...formData,
-      gallery_images: [...formData.gallery_images, { url: '', file_path: '' }]
-    });
+    setFormData(prev => ({
+      ...prev,
+      gallery_images: [...prev.gallery_images, { url: '', file_path: '' }]
+    }));
   };
 
   const removeGalleryImage = (index) => {
-    const newGalleryImages = formData.gallery_images.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
-      gallery_images: newGalleryImages
-    });
+    setFormData(prev => ({
+      ...prev,
+      gallery_images: prev.gallery_images.filter((_, i) => i !== index)
+    }));
   };
 
-  const updateGalleryImage = (index, url, filePath) => {
-    const newGalleryImages = [...formData.gallery_images];
-    newGalleryImages[index] = { url: url || '', file_path: filePath || '' };
-    setFormData({
-      ...formData,
-      gallery_images: newGalleryImages
+  const updateGalleryImage = useCallback((index, url, filePath) => {
+    setFormData(prev => {
+      const newGalleryImages = [...prev.gallery_images];
+      // Ensure the index exists
+      if (index < newGalleryImages.length) {
+        newGalleryImages[index] = { 
+          url: url || '', 
+          file_path: filePath || '' 
+        };
+      }
+      return {
+        ...prev,
+        gallery_images: newGalleryImages
+      };
     });
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -518,7 +525,7 @@ const EventsManagement = ({ language }) => {
                             </button>
                           </div>
                           <ImageUpload
-                            category="events/gallery"
+                            category="events"
                             currentImage={image.url}
                             currentFilePath={image.file_path}
                             onImageChange={(url, path) => updateGalleryImage(index, url, path)}

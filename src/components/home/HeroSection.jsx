@@ -23,10 +23,11 @@ const HeroSection = ({
       behavior: 'smooth'
     });
   };
-  return <div className="relative h-[600px] overflow-hidden">
+  return <div className="relative min-h-[calc(100vh-80px)] overflow-hidden pt-20">
+
       <div className="absolute inset-0">
         <img src="https://res.cloudinary.com/daqm7msfs/image/upload/v1764527878/Gemini_Generated_Beach_img_1_pp3flh.jpg" alt="Coastal landscape with fishing boats in Mithmumbari village" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-teal-900/50"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-teal-900/20"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
@@ -40,12 +41,21 @@ const HeroSection = ({
         }} transition={{
           duration: 0.8
         }} className="text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+            {/* <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
               {currentContent.title}
             </h1>
             <p className="text-xl md:text-2xl mb-8 font-light">
               {currentContent.subtitle}
-            </p>
+            </p> */}
+
+
+            <img src="https://res.cloudinary.com/daqm7msfs/image/upload/v1767005458/title_text_gradient_img_tbttof.png" alt={currentContent.title} className="max-w-[650px] w-full mb-6"/>
+
+<h1 className="sr-only">{currentContent.title}</h1>
+<p className="sr-only">{currentContent.subtitle}</p>
+
+
+
             <motion.button whileHover={{
             scale: 1.05
           }} whileTap={{
