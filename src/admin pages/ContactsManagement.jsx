@@ -65,15 +65,16 @@ const ContactsManagement = ({ language }) => {
   }, [fetchContacts]);
 
   const handleStatusChange = async (id, newStatus) => {
-    try {
-      const { error } = await apiService.updateContactStatus({ id, status: newStatus });
-      if (error) throw new Error(error);
-      fetchContacts();
-    } catch (error) {
-      console.error('Error updating contact status:', error);
-      alert('Failed to update status: ' + error.message);
-    }
-  };
+  try {
+    const { error } = await apiService.updateContactStatus(id, newStatus);
+    if (error) throw new Error(error);
+    fetchContacts();
+  } catch (error) {
+    console.error('Error updating contact status:', error);
+    alert('Failed to update status');
+  }
+};
+
 
   const handleDelete = async (id) => {
     if (!window.confirm(currentContent.confirmDelete)) return;

@@ -61,13 +61,13 @@ const ContactPage = ({ language }) => {
     setSubmitting(true);
 
     try {
-      const { error } = await apiService.submitContact({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-        status: 'new'
-      });
+      const { error } = await apiService.createContact({
+  name: formData.name,
+  email: formData.email,
+  phone: formData.phone,
+  message: formData.message
+});
+
 
       if (error) throw error;
 

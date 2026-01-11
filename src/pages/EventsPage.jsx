@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, MapPin, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  X
+} from 'lucide-react';
 import apiService from '../services/apiService';
 
 const EventsPage = ({ language }) => {
@@ -9,49 +17,63 @@ const EventsPage = ({ language }) => {
   const [loading, setLoading] = useState(true);
   const [hoveredEvent, setHoveredEvent] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
+  // Auto rotate images in modal
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    const images = [
+      ...(selectedEvent.image_url ? [{ url: selectedEvent.image_url }] : []),
+      ...(selectedEvent.parsedGalleryImages || [])
+    ];
+
+    if (images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setModalImageIndex(prev => (prev + 1) % images.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedEvent]);
+
   const fetchEvents = async () => {
     try {
       const { data, error } = await apiService.getEvents();
-
       if (error) throw error;
-      
+
       const activeEvents = (data || [])
         .filter(e => e.is_active === 1 || e.is_active === true)
         .sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
-      
-      // Parse gallery images for each event
+
       const eventsWithGallery = activeEvents.map(event => {
         let galleryImages = [];
         if (event.gallery_images) {
           try {
-            galleryImages = typeof event.gallery_images === 'string' 
-              ? JSON.parse(event.gallery_images) 
-              : event.gallery_images;
-            // Filter out any empty images
+            galleryImages =
+              typeof event.gallery_images === 'string'
+                ? JSON.parse(event.gallery_images)
+                : event.gallery_images;
             galleryImages = galleryImages.filter(img => img && img.url);
-          } catch (e) {
-            console.error('Error parsing gallery images:', e);
+          } catch {
             galleryImages = [];
           }
         }
         return { ...event, parsedGalleryImages: galleryImages };
       });
-      
+
       setEvents(eventsWithGallery);
-      
-      // Initialize image indices
+
       const indices = {};
-      eventsWithGallery.forEach(event => {
-        indices[event.id] = 0;
-      });
+      eventsWithGallery.forEach(e => (indices[e.id] = 0));
       setCurrentImageIndex(indices);
-    } catch (error) {
-      console.error('Error fetching events:', error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -72,27 +94,19 @@ const EventsPage = ({ language }) => {
 
   const currentContent = content[language];
 
-  const navigateGallery = (eventId, direction, totalImages) => {
+  const navigateGallery = (eventId, dir, total) => {
     setCurrentImageIndex(prev => {
-      const current = prev[eventId] || 0;
-      let newIndex;
-      if (direction === 'next') {
-        newIndex = (current + 1) % totalImages;
-      } else {
-        newIndex = current === 0 ? totalImages - 1 : current - 1;
-      }
-      return { ...prev, [eventId]: newIndex };
+      const curr = prev[eventId] || 0;
+      const next =
+        dir === 'next' ? (curr + 1) % total : curr === 0 ? total - 1 : curr - 1;
+      return { ...prev, [eventId]: next };
     });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center h-96">
-            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -101,165 +115,89 @@ const EventsPage = ({ language }) => {
     <>
       <Helmet>
         <title>{currentContent.title} - मिठमुंबरी ग्रामपंचायत</title>
-        <meta name="description" content="मिठमुंबरी ग्रामपंचायत कार्यक्रम आणि अपडेट्स" />
       </Helmet>
+
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-4">
-              {currentContent.title}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {currentContent.subtitle}
-            </p>
-          </motion.div>
+        <div className="max-w-7xl mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center text-green-800 mb-4">
+            {currentContent.title}
+          </h1>
+          <p className="text-center text-gray-600 mb-12">
+            {currentContent.subtitle}
+          </p>
 
           {events.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar size={64} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-600 text-lg">{currentContent.noEvents}</p>
+            <div className="text-center text-gray-500">
+              {currentContent.noEvents}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.map((event, index) => {
-                const hasGallery = event.parsedGalleryImages && event.parsedGalleryImages.length > 0;
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {events.map(event => {
                 const allImages = [
-                  ...(event.image_url ? [{ url: event.image_url, isMain: true }] : []),
-                  ...(hasGallery ? event.parsedGalleryImages : [])
+                  ...(event.image_url ? [{ url: event.image_url }] : []),
+                  ...(event.parsedGalleryImages || [])
                 ];
-                const totalImages = allImages.length;
-                const currentIdx = currentImageIndex[event.id] || 0;
-                const isHovered = hoveredEvent === event.id;
+                const idx = currentImageIndex[event.id] || 0;
 
                 return (
                   <motion.div
                     key={event.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="relative h-80 rounded-2xl overflow-hidden shadow-lg group"
-                    onMouseEnter={() => setHoveredEvent(event.id)}
-                    onMouseLeave={() => {
-                      setHoveredEvent(null);
-                      setCurrentImageIndex(prev => ({ ...prev, [event.id]: 0 }));
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setModalImageIndex(0);
                     }}
+                    onMouseEnter={() => setHoveredEvent(event.id)}
+                    onMouseLeave={() => setHoveredEvent(null)}
+                    className="relative h-80 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
                   >
-                    {/* Image Display */}
-                    <AnimatePresence mode="wait">
-                      {totalImages > 0 ? (
-                        <motion.img
-                          key={currentIdx}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          alt={language === 'mr' ? event.title_mr : event.title_en}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          src={allImages[currentIdx].url}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                          <ImageIcon size={64} className="text-white opacity-50" />
-                        </div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Gallery Navigation - Only show on hover and if there are multiple images */}
-                    {isHovered && totalImages > 1 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none z-10"
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigateGallery(event.id, 'prev', totalImages);
-                          }}
-                          className="pointer-events-auto bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all hover:scale-110"
-                        >
-                          <ChevronLeft size={24} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigateGallery(event.id, 'next', totalImages);
-                          }}
-                          className="pointer-events-auto bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all hover:scale-110"
-                        >
-                          <ChevronRight size={24} />
-                        </button>
-                      </motion.div>
-                    )}
-
-                    {/* Image Counter Badge */}
-                    {totalImages > 1 && (
-                      <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 z-20">
-                        <ImageIcon size={14} />
-                        {currentIdx + 1}/{totalImages}
+                    {allImages.length > 0 ? (
+                      <img
+                        src={allImages[idx].url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <ImageIcon size={48} />
                       </div>
                     )}
 
-                    {/* Image Dots Indicator */}
-                    {isHovered && totalImages > 1 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute bottom-24 left-0 right-0 flex justify-center gap-2 z-20"
-                      >
-                        {allImages.map((_, idx) => (
-                          <button
-                            key={idx}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCurrentImageIndex(prev => ({ ...prev, [event.id]: idx }));
-                            }}
-                            className={`transition-all ${
-                              idx === currentIdx
-                                ? 'w-8 h-2 bg-white'
-                                : 'w-2 h-2 bg-white/50 hover:bg-white/75'
-                            } rounded-full`}
-                          />
-                        ))}
-                      </motion.div>
+                    {hoveredEvent === event.id && allImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            navigateGallery(event.id, 'prev', allImages.length);
+                          }}
+                          className="absolute left-3 top-1/2 bg-white p-2 rounded-full"
+                        >
+                          <ChevronLeft />
+                        </button>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            navigateGallery(event.id, 'next', allImages.length);
+                          }}
+                          className="absolute right-3 top-1/2 bg-white p-2 rounded-full"
+                        >
+                          <ChevronRight />
+                        </button>
+                      </>
                     )}
 
-                    {/* Event Info Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-6">
-                      <div className="text-white w-full">
-                        <h3 className="text-xl font-bold mb-2">
-                          {language === 'mr' ? event.title_mr : event.title_en}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-5 flex items-end">
+                      <div className="text-white">
+                        <h3 className="text-lg font-bold">
+                          {language === 'mr'
+                            ? event.title_mr
+                            : event.title_en}
                         </h3>
-                        <p className="text-sm opacity-90 mb-3 line-clamp-2">
-                          {language === 'mr' ? event.description_mr : event.description_en}
+                        <p className="text-sm line-clamp-2">
+                          {language === 'mr'
+                            ? event.description_mr
+                            : event.description_en}
                         </p>
-                        
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar size={14} />
-                            {new Date(event.event_date).toLocaleDateString(
-                              language === 'mr' ? 'mr-IN' : 'en-IN',
-                              { year: 'numeric', month: 'long', day: 'numeric' }
-                            )}
-                          </div>
-                          {event.event_time && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock size={14} />
-                              {event.event_time}
-                            </div>
-                          )}
-                          {(event.location_mr || event.location_en) && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin size={14} />
-                              {language === 'mr' ? event.location_mr : event.location_en}
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -269,6 +207,172 @@ const EventsPage = ({ language }) => {
           )}
         </div>
       </div>
+
+      {/* FULLSCREEN MODAL */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedEvent(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-5xl w-full overflow-hidden"
+            >
+              <div className="relative h-96 bg-black overflow-hidden">
+  {(() => {
+    const images = [
+      ...(selectedEvent.image_url
+        ? [{ url: selectedEvent.image_url }]
+        : []),
+      ...(selectedEvent.parsedGalleryImages || [])
+    ];
+
+    return images.length ? (
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={modalImageIndex}
+          src={images[modalImageIndex].url}
+          alt=""
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full h-full object-cover"
+        />
+      </AnimatePresence>
+    ) : (
+      <div className="w-full h-full flex items-center justify-center">
+        <ImageIcon size={64} className="text-white/50" />
+      </div>
+    );
+  })()}
+
+  {/* LEFT BUTTON */}
+  {(() => {
+    const images = [
+      ...(selectedEvent.image_url
+        ? [{ url: selectedEvent.image_url }]
+        : []),
+      ...(selectedEvent.parsedGalleryImages || [])
+    ];
+
+    return images.length > 1 ? (
+      <button
+        onClick={() =>
+          setModalImageIndex(
+            modalImageIndex === 0
+              ? images.length - 1
+              : modalImageIndex - 1
+          )
+        }
+        className="absolute left-4 top-1/2 -translate-y-1/2
+                   bg-white/80 hover:bg-white
+                   p-3 rounded-full shadow-lg
+                   transition-all hover:scale-110"
+      >
+        <ChevronLeft size={28} />
+      </button>
+    ) : null;
+  })()}
+
+  {/* RIGHT BUTTON */}
+  {(() => {
+    const images = [
+      ...(selectedEvent.image_url
+        ? [{ url: selectedEvent.image_url }]
+        : []),
+      ...(selectedEvent.parsedGalleryImages || [])
+    ];
+
+    return images.length > 1 ? (
+      <button
+        onClick={() =>
+          setModalImageIndex((modalImageIndex + 1) % images.length)
+        }
+        className="absolute right-4 top-1/2 -translate-y-1/2
+                   bg-white/80 hover:bg-white
+                   p-3 rounded-full shadow-lg
+                   transition-all hover:scale-110"
+      >
+        <ChevronRight size={28} />
+      </button>
+    ) : null;
+  })()}
+
+  {/* IMAGE COUNTER */}
+  {(() => {
+    const images = [
+      ...(selectedEvent.image_url
+        ? [{ url: selectedEvent.image_url }]
+        : []),
+      ...(selectedEvent.parsedGalleryImages || [])
+    ];
+
+    return images.length > 1 ? (
+      <div className="absolute bottom-4 right-4
+                      bg-black/70 text-white
+                      px-3 py-1 rounded-full text-sm font-semibold">
+        {modalImageIndex + 1} / {images.length}
+      </div>
+    ) : null;
+  })()}
+
+  {/* CLOSE BUTTON */}
+  <button
+    onClick={() => setSelectedEvent(null)}
+    className="absolute top-4 right-4 bg-white p-2 rounded-full"
+  >
+    <X />
+  </button>
+</div>
+
+
+              <div className="p-6 space-y-4">
+                <h2 className="text-2xl font-bold">
+                  {language === 'mr'
+                    ? selectedEvent.title_mr
+                    : selectedEvent.title_en}
+                </h2>
+
+                <p className="text-gray-600">
+                  {language === 'mr'
+                    ? selectedEvent.description_mr
+                    : selectedEvent.description_en}
+                </p>
+
+                <div className="flex flex-wrap gap-4 text-sm text-gray-700">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    {new Date(selectedEvent.event_date).toLocaleDateString()}
+                  </span>
+                  {selectedEvent.event_time && (
+                    <span className="flex items-center gap-1">
+                      <Clock size={14} />
+                      {selectedEvent.event_time}
+                    </span>
+                  )}
+                  {(selectedEvent.location_mr ||
+                    selectedEvent.location_en) && (
+                    <span className="flex items-center gap-1">
+                      <MapPin size={14} />
+                      {language === 'mr'
+                        ? selectedEvent.location_mr
+                        : selectedEvent.location_en}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

@@ -12,8 +12,9 @@ const ServicesManagement = ({ language }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState({
-    name_mr: '',
-    name_en: '',
+    title_mr: '',
+title_en: '',
+
     description_mr: '',
     description_en: '',
     pdf_url: '',
@@ -92,15 +93,16 @@ const ServicesManagement = ({ language }) => {
 
     try {
       const serviceData = {
-        name_mr: formData.name_mr,
-        name_en: formData.name_en,
-        description_mr: formData.description_mr,
-        description_en: formData.description_en,
-        pdf_url: formData.pdf_url || null,
-        pdf_file_path: formData.pdf_file_path || null,
-        category: formData.category,
-        is_active: formData.is_active ? 1 : 0
-      };
+  title_mr: formData.title_mr,
+  title_en: formData.title_en,
+  description_mr: formData.description_mr,
+  description_en: formData.description_en,
+  pdf_url: formData.pdf_url || null,
+  pdf_file_path: formData.pdf_file_path || null,
+  category: formData.category,
+  is_active: formData.is_active ? 1 : 0
+};
+
 
       if (editingService) {
         const { error } = await apiService.updateService({
@@ -138,22 +140,23 @@ const ServicesManagement = ({ language }) => {
   const openEditModal = (service) => {
     setEditingService(service);
     setFormData({
-      name_mr: service.name_mr,
-      name_en: service.name_en,
-      description_mr: service.description_mr,
-      description_en: service.description_en,
-      pdf_url: service.pdf_url || '',
-      pdf_file_path: service.pdf_file_path || '',
-      category: service.category || 'service',
-      is_active: service.is_active === 1
-    });
+  title_mr: service.title_mr,
+  title_en: service.title_en,
+  description_mr: service.description_mr,
+  description_en: service.description_en,
+  pdf_url: service.pdf_url || '',
+  pdf_file_path: service.pdf_file_path || '',
+  category: service.category || 'service',
+  is_active: service.is_active === 1
+});
+
     setShowModal(true);
   };
 
   const resetForm = () => {
     setFormData({
-      name_mr: '',
-      name_en: '',
+      title_mr: '',
+title_en: '',
       description_mr: '',
       description_en: '',
       pdf_url: '',
@@ -221,8 +224,9 @@ const ServicesManagement = ({ language }) => {
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  {language === 'mr' ? service.name_mr : service.name_en}
-                </h3>
+  {language === 'mr' ? service.title_mr : service.title_en}
+</h3>
+
                 <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                   {language === 'mr' ? service.description_mr : service.description_en}
                 </p>
@@ -296,8 +300,9 @@ const ServicesManagement = ({ language }) => {
                     </label>
                     <input
                       type="text"
-                      value={formData.name_mr}
-                      onChange={(e) => setFormData({ ...formData, name_mr: e.target.value })}
+                      value={formData.title_mr}
+onChange={e => setFormData({ ...formData, title_mr: e.target.value })}
+
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       required
                     />
@@ -309,8 +314,9 @@ const ServicesManagement = ({ language }) => {
                     </label>
                     <input
                       type="text"
-                      value={formData.name_en}
-                      onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
+                      value={formData.title_en}
+onChange={e => setFormData({ ...formData, title_en: e.target.value })}
+
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       required
                     />

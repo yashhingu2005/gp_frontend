@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, X, Save, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, Calendar, Image as ImageIcon } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
+import ImageUpload from './ImageUploadSupabase';
 
 const NewsManagement = ({ language }) => {
   const { apiService } = useAuth();
@@ -15,7 +16,11 @@ const NewsManagement = ({ language }) => {
     title_en: '',
     content_mr: '',
     content_en: '',
-    date: new Date().toISOString().split('T')[0],
+    category: 'news',
+    image_url: '',
+    image_file_path: '',
+    is_featured: false,
+    published_date: new Date().toISOString().split('T')[0],
     is_active: true
   });
 
@@ -28,15 +33,22 @@ const NewsManagement = ({ language }) => {
       titleEn: 'शीर्षक (इंग्रजी)',
       contentMr: 'सामग्री (मराठी)',
       contentEn: 'सामग्री (इंग्रजी)',
-      date: 'तारीख',
-      active: 'सक्रिय',
-      inactive: 'निष्क्रिय',
+      category: 'श्रेणी',
+      imageUrl: 'प्रतिमा',
+      publishedDate: 'प्रकाशन तारीख',
+      isFeatured: 'वैशिष्ट्यीकृत',
+      isActive: 'सक्रिय',
       save: 'जतन करा',
       cancel: 'रद्द करा',
       delete: 'हटवा',
       edit: 'संपादित करा',
       confirmDelete: 'तुम्हाला खात्री आहे का?',
-      noNews: 'कोणतीही बातमी उपलब्ध नाही'
+      noNews: 'कोणतीही बातमी उपलब्ध नाही',
+      categories: {
+        news: 'बातमी',
+        announcement: 'घोषणा',
+        notice: 'सूचना'
+      }
     },
     en: {
       title: 'News Management',
@@ -46,15 +58,22 @@ const NewsManagement = ({ language }) => {
       titleEn: 'Title (English)',
       contentMr: 'Content (Marathi)',
       contentEn: 'Content (English)',
-      date: 'Date',
-      active: 'Active',
-      inactive: 'Inactive',
+      category: 'Category',
+      imageUrl: 'Image',
+      publishedDate: 'Published Date',
+      isFeatured: 'Featured',
+      isActive: 'Active',
       save: 'Save',
       cancel: 'Cancel',
       delete: 'Delete',
       edit: 'Edit',
       confirmDelete: 'Are you sure?',
-      noNews: 'No news available'
+      noNews: 'No news available',
+      categories: {
+        news: 'News',
+        announcement: 'Announcement',
+        notice: 'Notice'
+      }
     }
   };
 
@@ -85,7 +104,11 @@ const NewsManagement = ({ language }) => {
         title_en: formData.title_en,
         content_mr: formData.content_mr,
         content_en: formData.content_en,
-        date: formData.date,
+        category: formData.category,
+        image_url: formData.image_url || null,
+        image_file_path: formData.image_file_path || null,
+        is_featured: formData.is_featured ? 1 : 0,
+        published_date: formData.published_date,
         is_active: formData.is_active ? 1 : 0
       };
 
@@ -129,7 +152,11 @@ const NewsManagement = ({ language }) => {
       title_en: newsItem.title_en,
       content_mr: newsItem.content_mr,
       content_en: newsItem.content_en,
-      date: newsItem.date,
+      category: newsItem.category,
+      image_url: newsItem.image_url || '',
+      image_file_path: newsItem.image_file_path || '',
+      is_featured: newsItem.is_featured === 1,
+      published_date: newsItem.published_date,
       is_active: newsItem.is_active === 1
     });
     setShowModal(true);
@@ -141,7 +168,11 @@ const NewsManagement = ({ language }) => {
       title_en: '',
       content_mr: '',
       content_en: '',
-      date: new Date().toISOString().split('T')[0],
+      category: 'news',
+      image_url: '',
+      image_file_path: '',
+      is_featured: false,
+      published_date: new Date().toISOString().split('T')[0],
       is_active: true
     });
     setEditingNews(null);
@@ -172,58 +203,67 @@ const NewsManagement = ({ language }) => {
         </Button>
       </div>
 
-      {/* News List */}
-      <div className="space-y-4">
+      {/* News Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {news.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500">{currentContent.noNews}</p>
           </div>
         ) : (
-          news.map((item, index) => (
+          news.map((newsItem, index) => (
             <motion.div
-              key={item.id}
+              key={newsItem.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
+              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
             >
+              <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 relative">
+                {newsItem.image_url ? (
+                  <img
+                    src={newsItem.image_url}
+                    alt={newsItem.title_en}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <ImageIcon size={64} />
+                  </div>
+                )}
+                {newsItem.is_featured && (
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                    Featured
+                  </div>
+                )}
+              </div>
               <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        item.is_active === 1 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {item.is_active === 1 ? currentContent.active : currentContent.inactive}
-                      </span>
-                      <span className="flex items-center gap-1 text-sm text-gray-500">
-                        <Calendar size={14} />
-                        {new Date(item.date).toLocaleDateString(language === 'mr' ? 'mr-IN' : 'en-IN')}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">
-                      {language === 'mr' ? item.title_mr : item.title_en}
-                    </h3>
-                    <p className="text-gray-600 line-clamp-2">
-                      {language === 'mr' ? item.content_mr : item.content_en}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition-colors"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                <span className="text-xs text-blue-600 font-semibold uppercase">
+                  {currentContent.categories[newsItem.category]}
+                </span>
+                <h3 className="text-xl font-bold text-gray-800 mb-2 mt-1">
+                  {language === 'mr' ? newsItem.title_mr : newsItem.title_en}
+                </h3>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  {language === 'mr' ? newsItem.content_mr : newsItem.content_en}
+                </p>
+                <p className="text-xs text-gray-500 mb-4">
+                  {new Date(newsItem.published_date).toLocaleDateString(language === 'mr' ? 'mr-IN' : 'en-IN')}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openEditModal(newsItem)}
+                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Edit size={16} />
+                    {currentContent.edit}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(newsItem.id)}
+                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    {currentContent.delete}
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -248,7 +288,7 @@ const NewsManagement = ({ language }) => {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             >
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between z-10">
                 <h2 className="text-2xl font-bold text-gray-800">
                   {editingNews ? currentContent.editNews : currentContent.addNews}
                 </h2>
@@ -296,8 +336,8 @@ const NewsManagement = ({ language }) => {
                   <textarea
                     value={formData.content_mr}
                     onChange={(e) => setFormData({ ...formData, content_mr: e.target.value })}
-                    rows="4"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows="4"
                     required
                   />
                 </div>
@@ -309,8 +349,8 @@ const NewsManagement = ({ language }) => {
                   <textarea
                     value={formData.content_en}
                     onChange={(e) => setFormData({ ...formData, content_en: e.target.value })}
-                    rows="4"
                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    rows="4"
                     required
                   />
                 </div>
@@ -318,30 +358,70 @@ const NewsManagement = ({ language }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      {currentContent.date}
+                      {currentContent.category}
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="news">{currentContent.categories.news}</option>
+                      <option value="announcement">{currentContent.categories.announcement}</option>
+                      <option value="notice">{currentContent.categories.notice}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {currentContent.publishedDate}
                     </label>
                     <input
                       type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      value={formData.published_date}
+                      onChange={(e) => setFormData({ ...formData, published_date: e.target.value })}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       required
                     />
                   </div>
+                </div>
 
-                  <div className="flex items-end">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.is_active}
-                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                        className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
-                      />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {currentContent.active}
-                      </span>
-                    </label>
-                  </div>
+                <div>
+                  <ImageUpload
+                    category="news"
+                    currentImage={formData.image_url}
+                    currentFilePath={formData.image_file_path}
+                    onImageChange={(url, path) => {
+                      setFormData({
+                        ...formData,
+                        image_url: url || '',
+                        image_file_path: path || ''
+                      });
+                    }}
+                    label={currentContent.imageUrl}
+                    language={language}
+                  />
+                </div>
+
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_featured}
+                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                      className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+                    />
+                    <span className="text-sm font-semibold text-gray-700">{currentContent.isFeatured}</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                      className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+                    />
+                    <span className="text-sm font-semibold text-gray-700">{currentContent.isActive}</span>
+                  </label>
                 </div>
 
                 <div className="flex gap-3 pt-4">

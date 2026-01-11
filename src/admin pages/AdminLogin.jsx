@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Mail, Eye, EyeOff, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, Mail, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,19 +16,27 @@ const AdminLogin = ({ language, setLanguage }) => {
     mr: {
       title: 'प्रशासक प्रवेश',
       subtitle: 'कृपया आपली ओळखपत्रे प्रविष्ट करा',
-      username: 'वापरकर्ता नाव',
+      email: 'ईमेल',
       password: 'पासवर्ड',
       login: 'प्रवेश करा',
-      error: 'अवैध वापरकर्ता नाव किंवा पासवर्ड',
+      logging: 'प्रवेश करत आहे...',
+      invalidCredentials: 'अवैध ईमेल किंवा पासवर्ड',
+      loginFailed: 'प्रवेश अयशस्वी',
+      networkError: 'नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा',
+      emptyFields: 'कृपया सर्व फील्ड भरा',
       footer: 'मिठमुंबरी ग्रामपंचायत प्रशासन प्रणाली'
     },
     en: {
       title: 'Admin Login',
       subtitle: 'Please enter your credentials',
-      username: 'Username',
+      email: 'Email',
       password: 'Password',
       login: 'Login',
-      error: 'Invalid username or password',
+      logging: 'Logging in...',
+      invalidCredentials: 'Invalid email or password',
+      loginFailed: 'Login failed',
+      networkError: 'Network error. Please try again',
+      emptyFields: 'Please fill in all fields',
       footer: 'Mithmumbari Gram Panchayat Administration System'
     }
   };
@@ -38,13 +46,41 @@ const AdminLogin = ({ language, setLanguage }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate inputs
+    if (!email || !password) {
+      setError(currentContent.emptyFields);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      const result = await signIn(email, password);
+      
+      // Check if login failed
+      if (result && result.error) {
+        setError(currentContent.invalidCredentials);
+      } else if (!result || !result.data) {
+        setError(currentContent.loginFailed);
+      }
     } catch (error) {
       console.error('Login error:', error);
-      setError(currentContent.error);
+      
+      // Provide user-friendly error messages
+      if (error.message) {
+        if (error.message.toLowerCase().includes('network')) {
+          setError(currentContent.networkError);
+        } else if (error.message.toLowerCase().includes('invalid') || 
+                   error.message.toLowerCase().includes('wrong') ||
+                   error.message.toLowerCase().includes('incorrect')) {
+          setError(currentContent.invalidCredentials);
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError(currentContent.loginFailed);
+      }
     } finally {
       setLoading(false);
     }
@@ -132,15 +168,30 @@ const AdminLogin = ({ language, setLanguage }) => {
           className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
-              >
-                {error}
-              </motion.div>
-            )}
+            {/* Error Message */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-3"
+                >
+                  <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError('')}
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <Eye size={16} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -151,10 +202,18 @@ const AdminLogin = ({ language, setLanguage }) => {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(''); // Clear error when user starts typing
+                  }}
+                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all ${
+                    error 
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder={currentContent.email}
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -168,15 +227,24 @@ const AdminLogin = ({ language, setLanguage }) => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(''); // Clear error when user starts typing
+                  }}
+                  className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all ${
+                    error 
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder="••••••••"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -186,12 +254,12 @@ const AdminLogin = ({ language, setLanguage }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white py-3 rounded-xl font-semibold shadow-lg transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white py-3 rounded-xl font-semibold shadow-lg transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Loading...</span>
+                  <span>{currentContent.logging}</span>
                 </div>
               ) : (
                 currentContent.login

@@ -124,7 +124,6 @@ const ServicesPage = ({ language }) => {
                         </a>
                       ) : (
                         <div className="text-sm text-gray-500 italic">
-                          {language === 'mr' ? 'फॉर्म लवकरच उपलब्ध होईल' : 'Form coming soon'}
                         </div>
                       )}
                     </div>

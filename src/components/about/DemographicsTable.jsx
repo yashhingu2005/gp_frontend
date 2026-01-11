@@ -36,13 +36,7 @@ const DemographicsTable = ({ language }) => {
         { label: 'Total Families', total: '265', male: '–', female: '–' },
         { label: 'Population', total: '920', male: '447', female: '473' },
         { label: 'Voter Population', total: '724', male: '354', female: '370' },
-        { label: 'Children (0-6)', total: '1104', male: '521', female: '569' },
-        { label: 'Scheduled Castes', total: '35', male: '17', female: '18' },
-        { label: 'Scheduled Tribes', total: '4553', male: '2262', female: '2290' },
-        { label: 'Literacy', total: '45.42%', male: '54.65%', female: '35.60%' },
-        { label: 'Total Workers', total: '2366', male: '1241', female: '1125' },
-        { label: 'Main Workers', total: '2366', male: '–', female: '–' },
-        { label: 'Marginal Workers', total: '29', male: '15', female: '14' }
+        
       ],
       additionalInfo: [
         { label: 'Total Family Count', value: '264' },

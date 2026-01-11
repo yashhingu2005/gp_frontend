@@ -8,7 +8,6 @@ import GalleryManagement from './Gallarymanagement';
 import ServicesManagement from './ServicesManagement';
 import ContactsManagement from './ContactsManagement';
 import EventsManagement from './EventManagement';
-import SettingsManagement from './Settingsmanagement';
 import { useAuth } from '../contexts/AuthContext';
 // Import other management components as needed
 
@@ -51,8 +50,6 @@ const AdminApp = () => {
         return <ContactsManagement language={language} />;
       case 'gallery':
         return <GalleryManagement language={language} />;
-      case 'settings':
-        return <SettingsManagement language={language} />;
       default:
         return <Dashboard language={language} setCurrentPage={setCurrentPage} />;
     }

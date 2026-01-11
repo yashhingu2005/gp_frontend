@@ -48,7 +48,7 @@ const AdminLayout = ({ children, user, onLogout, language, setLanguage, currentP
     { id: 'services', label: currentContent.services, icon: FileText },
     { id: 'contacts', label: currentContent.contacts, icon: MessageSquare },
     { id: 'gallery', label: currentContent.gallery, icon: Image },
-    { id: 'settings', label: currentContent.settings, icon: Settings }
+    
   ];
 
   return (
