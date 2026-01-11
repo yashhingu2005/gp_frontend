@@ -4,7 +4,6 @@ import AdminLayout from './AdminLayout';
 import Dashboard from './Dashboard';
 import TeamManagement from './TeamManagement';
 import NewsManagement from './newsmanagement';
-import GalleryManagement from './Gallarymanagement';
 import ServicesManagement from './ServicesManagement';
 import ContactsManagement from './ContactsManagement';
 import EventsManagement from './EventManagement';
@@ -48,8 +47,7 @@ const AdminApp = () => {
         return <ServicesManagement language={language} />;
        case 'contacts':
         return <ContactsManagement language={language} />;
-      case 'gallery':
-        return <GalleryManagement language={language} />;
+    
       default:
         return <Dashboard language={language} setCurrentPage={setCurrentPage} />;
     }

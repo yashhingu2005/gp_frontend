@@ -46,7 +46,6 @@ const NewsManagement = ({ language }) => {
       noNews: 'कोणतीही बातमी उपलब्ध नाही',
       categories: {
         news: 'बातमी',
-        announcement: 'घोषणा',
         notice: 'सूचना'
       }
     },
@@ -71,7 +70,6 @@ const NewsManagement = ({ language }) => {
       noNews: 'No news available',
       categories: {
         news: 'News',
-        announcement: 'Announcement',
         notice: 'Notice'
       }
     }
@@ -366,7 +364,6 @@ const NewsManagement = ({ language }) => {
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       <option value="news">{currentContent.categories.news}</option>
-                      <option value="announcement">{currentContent.categories.announcement}</option>
                       <option value="notice">{currentContent.categories.notice}</option>
                     </select>
                   </div>

@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import EventsPage from './pages/EventsPage';
+import NoticesPage from './pages/NoticesPage';
 import ContactPage from './pages/ContactPage';
 import AdminApp from './admin pages/AdminApp';
 import { Toaster } from './components/ui/toaster';
@@ -46,6 +47,7 @@ function AppContent({ language, toggleLanguage }) {
           <Route path="/about" element={<AboutPage language={language} />} />
           <Route path="/services" element={<ServicesPage language={language} />} />
           <Route path="/events" element={<EventsPage language={language} />} />
+          <Route path="/notices" element={<NoticesPage language={language} />} />
           <Route path="/contact" element={<ContactPage language={language} />} />
           <Route path="/admin/*" element={<AdminApp />} />
         </Routes>

@@ -25,6 +25,7 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'फोन नंबर',
       messagePlaceholder: 'तुमचा संदेश',
       submitButton: 'संदेश पाठवा',
+      submitting: 'पाठवत आहे...',
       address: 'पत्ता',
       addressDetails: 'मिठमुंबरी, देवगड तालुका, जि. सिंधुदुर्ग ४१६६१२ ',
       phone: 'फोन',
@@ -43,6 +44,7 @@ const ContactPage = ({ language }) => {
       phonePlaceholder: 'Phone Number',
       messagePlaceholder: 'Your Message',
       submitButton: 'Send Message',
+      submitting: 'Sending...',
       address: 'Address',
       addressDetails: 'Mithmumbari, Devgad Taluka, District- Sindhudurg 416612',
       phone: 'Phone',
@@ -56,24 +58,55 @@ const ContactPage = ({ language }) => {
 
   const currentContent = content[language];
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone) => {
+    // Indian phone number validation (10 digits)
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate email
+    if (!validateEmail(formData.email)) {
+      toast({
+        title: language === 'mr' ? 'अवैध ईमेल' : 'Invalid Email',
+        description: language === 'mr' ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा' : 'Please enter a valid email address',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Validate phone
+    if (!validatePhone(formData.phone)) {
+      toast({
+        title: language === 'mr' ? 'अवैध फोन नंबर' : 'Invalid Phone Number',
+        description: language === 'mr' ? 'कृपया वैध 10 अंकी फोन नंबर प्रविष्ट करा' : 'Please enter a valid 10-digit phone number',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const { error } = await apiService.createContact({
-  name: formData.name,
-  email: formData.email,
-  phone: formData.phone,
-  message: formData.message
-});
-
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message
+      });
 
       if (error) throw error;
 
       toast({
-        title: currentContent.successTitle,
-        description: currentContent.successMessage,
+        title: language === 'mr' ? 'यशस्वी' : 'Success',
+        description: language === 'mr' ? 'आपला संदेश यशस्वीरित्या पाठविला गेला' : 'Your message has been sent successfully',
       });
 
       // Reset form
@@ -86,8 +119,8 @@ const ContactPage = ({ language }) => {
     } catch (error) {
       console.error('Error submitting contact form:', error);
       toast({
-        title: currentContent.errorTitle,
-        description: currentContent.errorMessage,
+        title: language === 'mr' ? 'त्रुटी' : 'Error',
+        description: language === 'mr' ? 'संदेश पाठविण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा' : 'Failed to send message. Please try again',
         variant: 'destructive'
       });
     } finally {
@@ -169,6 +202,7 @@ const ContactPage = ({ language }) => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                       required
                       disabled={submitting}
+                      maxLength="10"
                     />
                   </div>
                   <div>
@@ -244,8 +278,7 @@ const ContactPage = ({ language }) => {
 
               <div className="bg-white rounded-2xl shadow-lg p-2 h-80">
                 <iframe
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=73.367789%2C16.363511%2C73.387789%2C16.383511&layer=mapnik
-"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=73.367789%2C16.363511%2C73.387789%2C16.383511&layer=mapnik"
                   className="w-full h-full rounded-xl"
                   title="Location Map"
                 ></iframe>

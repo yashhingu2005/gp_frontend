@@ -123,22 +123,7 @@ const Footer = ({ language }) => {
             </ul>
           </div>
 
-          {/* Govt Links */}
-          <div>
-            <span className="text-xl font-bold mb-4 block">
-              {currentContent.govLinksTitle}
-            </span>
-
-            <ul className="space-y-2">
-              {currentContent.govLinks.map((link, index) => (
-                <li key={index}>
-                  <span className="text-sm hover:text-green-300 transition-colors cursor-pointer inline-block">
-                    {link}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          
 
         </div>
 

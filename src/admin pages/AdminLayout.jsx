@@ -17,7 +17,7 @@ const AdminLayout = ({ children, user, onLogout, language, setLanguage, currentP
       events: 'कार्यक्रम',
       services: 'सेवा',
       contacts: 'संपर्क',
-      gallery: 'दालन',
+
       settings: 'सेटिंग्ज',
       logout: 'बाहेर पडा',
       welcome: 'स्वागत आहे',
@@ -30,7 +30,7 @@ const AdminLayout = ({ children, user, onLogout, language, setLanguage, currentP
       events: 'Events',
       services: 'Services',
       contacts: 'Contacts',
-      gallery: 'Gallery',
+      
       settings: 'Settings',
       logout: 'Logout',
       welcome: 'Welcome',
@@ -46,8 +46,8 @@ const AdminLayout = ({ children, user, onLogout, language, setLanguage, currentP
     { id: 'news', label: currentContent.news, icon: Newspaper },
     { id: 'events', label: currentContent.events, icon: Calendar },
     { id: 'services', label: currentContent.services, icon: FileText },
-    { id: 'contacts', label: currentContent.contacts, icon: MessageSquare },
-    { id: 'gallery', label: currentContent.gallery, icon: Image },
+    { id: 'contacts', label: currentContent.contacts, icon: MessageSquare }
+    
     
   ];
 

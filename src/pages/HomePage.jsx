@@ -2,31 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import HeroSection from '../components/home/HeroSection';
 import QuickServices from '../components/home/QuickServices';
-import NewsSection from '../components/home/NewsSection';
+import EventsSection from '../components/home/EventsSection.jsx';
 import apiService from '../services/apiService';
 
 const HomePage = ({ language }) => {
-  const [featuredNews, setFeaturedNews] = useState([]);
+  const [latestEvents, setLatestEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchFeaturedNews();
+    fetchLatestEvents();
   }, []);
 
-  const fetchFeaturedNews = async () => {
+  const fetchLatestEvents = async () => {
     try {
-      const { data, error } = await apiService.getNews();
+      const { data, error } = await apiService.getEvents();
 
       if (error) throw error;
       
-      const featured = (data || [])
-        .filter(n => (n.is_active === 1 || n.is_active === true) && (n.is_featured === 1 || n.is_featured === true))
-        .sort((a, b) => new Date(b.date || b.published_date) - new Date(a.date || a.published_date))
-        .slice(0, 3);
+      const activeEvents = (data || [])
+        .filter(e => e.is_active === 1 || e.is_active === true)
+        .sort((a, b) => new Date(b.event_date) - new Date(a.event_date))
+        .slice(0, 5);
       
-      setFeaturedNews(featured);
+      setLatestEvents(activeEvents);
     } catch (error) {
-      console.error('Error fetching featured news:', error);
+      console.error('Error fetching latest events:', error);
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ const HomePage = ({ language }) => {
       <div>
         <HeroSection language={language} />
         <QuickServices language={language} />
-        <NewsSection language={language} featuredNews={featuredNews} loading={loading} />
+        <EventsSection language={language} latestEvents={latestEvents} loading={loading} />
       </div>
     </>
   );
